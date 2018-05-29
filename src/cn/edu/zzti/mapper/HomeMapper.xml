@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.zzti.mapper.HomeMapper">
+	<insert id="insert" parameterType="Home" useGeneratedKeys="true"
+		keyProperty="id">
+		insert into Home (name, note) values (#{name}, #{note})
+	</insert>
+	<delete id="delete" parameterType="int">
+		delete from home where id =
+		#{id}
+	</delete>
+	<update id="update" parameterType="Home">
+			update home
+			<set>
+				id = id,
+				<if test="name != null and name != ''">
+					name = #{name},
+				</if>
+				<if test="note != null and note != ''">
+					note = #{note},
+				</if>
+			</set>
+			where id = #{id}
+	</update>
+</mapper>

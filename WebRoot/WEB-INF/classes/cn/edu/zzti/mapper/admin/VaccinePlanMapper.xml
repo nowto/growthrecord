@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.zzti.mapper.admin.VaccinePlanMapper">
+	<insert id="insert" parameterType="VaccinePlan"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into vaccineplan (name,
+		note, startDate, endDate, minAge, maxAge, site) values (#{name},
+		#{note}, #{startDate}, #{endDate}, #{minAge}, #{maxAge}, #{site})
+	</insert>
+
+	<select id="selectById" parameterType="int" resultType="VaccinePlan">
+		select *
+		from vaccineplan where id = #{id}
+	</select>
+
+	<select id="selectBySearch" parameterType="cn.edu.zzti.dto.VaccinePlanSearchBean"
+		resultType="VaccinePlan">
+		select * from vaccineplan
+		<where>
+			<if test="name != null">
+				and name like concat('%',#{name},'%')
+			</if>
+		</where>
+		order by startDate desc limit #{limitOne}, #{limitTwo}
+	</select>
+	<select id="selectBySearchCount" parameterType="cn.edu.zzti.dto.VaccinePlanSearchBean"
+		resultType="java.lang.Integer">
+		select count(*) from vaccineplan
+		<where>
+			<if test="name != null">
+				and name like concat('%',#{name},'%')
+			</if>
+		</where>
+	</select>
+	<delete id="deleteById" parameterType="int">
+		delete from vaccineplan
+		where id = #{id}
+	</delete>
+	<update id="update" parameterType="VaccinePlan">
+		update vaccineplan
+		<set>
+			<if test="name != null and name != ''">
+				name = #{name},
+			</if>
+			<if test="note != null and note != ''">
+				note = #{note},
+			</if>
+
+			<if test="startDate != null">
+				startDate = #{startDate},
+			</if>
+
+			<if test="endDate != null">
+				endDate = #{endDate},
+			</if>
+			<if test="minAge != null">
+				minAge = #{minAge},
+			</if>
+
+			<if test="maxAge != null">
+				maxAge = #{maxAge},
+			</if>
+			<if test="site != null and site != ''">
+				site = #{site},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+</mapper>

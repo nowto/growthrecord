@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.zzti.mapper.UserMapper">
+	<resultMap type="User" id="UserMap">
+		<id column="id" property="id"/>
+		<result column="username" property="username"/>
+		<result column="password" property="password"/>
+		<result column="email" property="email"/>
+		<result column="sex" property="sex"/>
+		<result column="homeId" property="homeId"/>
+		<association property="home" javaType="Home">
+			<id column="homeId" property="id"/>
+			<result column="name" property="name"/>
+			<result column="note" property="note"/>
+		</association>
+	</resultMap>
+	
+	<!-- <update id="">
+		update user set cc =cc where id = #{id};
+	</update> -->
+
+	<insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+		insert into user (username, password, email, sex, homeId) values (#{username}, #{password}, #{email}, #{sex}, #{homeId}) 
+	</insert>
+	<delete id="delete" parameterType="int">
+		delete from user where id = #{id}
+	</delete>
+	<!-- 通过id查找 -->
+	<select id="select" parameterType="int" resultType="User">
+		select id, username, password, email, sex, homeId from user where id = #{id} 
+	</select>
+	<select id="selectWithHome" parameterType="int" resultMap="UserMap">
+		select user.id, username, password, email, sex, homeId, name, note from user join home on homeId = home.id where user.id = #{id};
+	</select>
+	
+	<!-- 通过username查找 -->
+	<select id="selectByUsername" parameterType="java.lang.String" resultType="User">
+		select id, username, password, email, sex, homeId from user where username = #{username} 
+	</select>
+	<select id="selectLikeUsername" parameterType="java.lang.String" resultType="User">
+		select id, username, password, email, sex, homeId from user where username like concat('%', #{username}, '%') 
+	</select>
+	<select id="selectByUsernameWithHome" parameterType="java.lang.String" resultMap="UserMap">
+		select user.id, username, password, email, sex, homeId, name, note from user join home on homeId = home.id where username = #{username};
+	</select>
+	
+	<!-- 通过homeId查找 -->
+	<select id="selectByHomeId" parameterType="int" resultType="User">
+		select id, username, password, email, sex, homeId from user where homeId = #{homeId} 
+	</select>
+	<select id="selectByHomeIdWithHome" parameterType="int" resultMap="UserMap">
+		select user.id, username, password, email, sex, homeId, name, note from user join home on homeId = home.id where homeId = #{homeId};
+	</select>
+	
+	<select id="selectByAll" parameterType="cn.edu.zzti.dto.UserDto" resultType="User">
+		select id, username, password, email, sex, homeId from user 
+		<where>
+			<if test="id !=null">
+				and id = #{id}
+			</if>
+			<if test="username !=null">
+				and username = #{username}
+			</if>
+			<if test="password !=null">
+				and password = #{password}
+			</if>
+			<if test="email !=null">
+				and email = #{email}
+			</if>
+			<if test="sex !=null">
+				and sex = #{sex}
+			</if>
+			<if test="homeId !=null">
+				and homeId = #{homeId}
+			</if>
+		</where>
+	</select>
+	
+	<update id="update" parameterType="User">
+		update user
+		<set>
+			<if test="password !=null and password != ''">
+				password = #{password},
+			</if>
+			<if test="email !=null and email != ''">
+				email = #{email},
+			</if>
+			<if test="sex !=null and sex != ''">
+				sex = #{sex},
+			</if>
+			<if test="homeId != null">
+				homeId = #{homeId}
+			</if>
+		</set>
+		where id = #{id} and username = #{username}
+	</update>
+	<!-- <update id="updateHomeid" parameterType="gsMap">
+		update user set homeId = #{gongId} where id = #{shouId};
+	</update> -->
+</mapper>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.zzti.mapper.InviteMapper">
+	<resultMap type="Invite" id="InviteMap">
+		<id column="i_id" property="id" />
+		<result column="i_gongId" property="gongId" />
+		<result column="i_shouId" property="shouId" />
+		<result column="i_agree" property="agree" />
+		<result column="i_leading" property="leading" />
+		<result column="i_read" property="read" />
+
+		<association property="gong" javaType="User">
+			<id column="i_gongId" property="id" />
+			<result column="g_username" property="username" />
+			<result column="g_password" property="password" />
+			<result column="g_email" property="email" />
+			<result column="g_sex" property="sex" />
+			<result column="g_homeId" property="homeId" />
+		</association>
+
+		<association property="shou" javaType="User">
+			<id column="i_shouId" property="id" />
+			<result column="s_username" property="username" />
+			<result column="s_password" property="password" />
+			<result column="s_email" property="email" />
+			<result column="s_sex" property="sex" />
+			<result column="s_homeId" property="homeId" />
+		</association>
+	</resultMap>
+
+	<insert id="insert" parameterType="Invite" useGeneratedKeys="true"
+		keyProperty="id">
+		insert into invite (gongId, shouId, `leading`) values (#{gongId},
+		#{shouId}, #{leading})
+	</insert>
+	
+	<update id="updateShouRefuse" parameterType="int">
+		update invite set agree = null where id = #{id};
+	</update>
+	<update id="updateShouAgree" parameterType="int">
+		update invite set agree = 1 where id = #{id}
+	</update>
+	
+	<update id="updateHavereadByGong" parameterType="int">
+		update invite set `read` = 1 where id = #{id};
+	</update>
+	
+	<update id="updateForRecover" parameterType="int">
+		update inviete set `agree` = 0, `read` = 0, `leading` = null where gongId = #{uid} or shouId = #{uid}
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		delete from invite where id =
+		#{id}
+	</delete>
+	<delete id="deleteByGongOrShou" parameterType="int">
+		delete from invite where gongId = #{id} or shouId = #{id}
+	</delete>
+
+	<!-- by Id -->
+	<select id="select" parameterType="int" resultType="Invite">
+		select id,
+		gongId, shouId, agree, `leading`, `read` from
+		invite where id = #{id}
+	</select>
+	<select id="selectWithGS" parameterType="int" resultMap="InviteMap">
+		select
+		i.id i_id, i.gongId i_gongId, i.shouId i_shouId, i.agree i_agree, i.`leading` i_leading, i.`read` i_read,
+		g.username g_username, g.`password` g_password, g.email g_email, g.sex
+		g_sex,
+		g.homeId g_homeId,
+		s.username s_username, s.`password` s_password,
+		s.email s_email, s.sex s_sex,
+		s.homeId s_homeId
+		from
+		invite as i join
+		user as g join user as s
+		on i.gongId = g.id and i.shouId = s.id
+		where
+		i.id = #{id}
+	</select>
+
+
+
+
+	<!-- by Gong User -->
+	
+	<sql id="selectByGongSql">
+		select id, gongId, shouId, agree, `leading`, `read` from
+		invite where gongId =
+		#{id} and `read` = 0
+	</sql>
+	<sql id="selectByGongWithGSSql">
+		select
+		i.id i_id, i.gongId i_gongId, i.shouId i_shouId, i.`leading` i_leading, i.`read` i_read,
+		i.agree i_agree,
+		g.username g_username, g.password g_password, g.email
+		g_email, g.sex g_sex,
+		g.homeId g_homeId,
+		s.username s_username,
+		s.password s_password, s.email s_email, s.sex s_sex,
+		s.homeId s_homeId
+		from
+		invite as i join user as g join user as s
+		on i.gongId = g.id and
+		i.shouId = s.id
+		where
+		i.gongId = #{id}  and `read` = 0
+	</sql>
+	<!-- 拒绝 -->
+	<select id="selectRefuseByGong" parameterType="User" resultType="Invite">
+		<include refid="selectByGongSql" />
+		and agree is null
+	</select>
+	<select id="selectRefuseByGongWithGS" parameterType="User"
+		resultMap="InviteMap">
+		<include refid="selectByGongWithGSSql" />
+		and agree is null
+	</select>
+	<!-- 未答复 -->
+	<select id="selectNoReplyByGong" parameterType="User"
+		resultType="Invite">
+		<include refid="selectByGongSql" />
+		and agree = 0
+	</select>
+	<select id="selectNoReplyByGongWithGS" parameterType="User"
+		resultMap="InviteMap">
+		<include refid="selectByGongWithGSSql" />
+		and agree = 0
+	</select>
+	<!-- 已同意 -->
+	<select id="selectAgreeByGong" parameterType="User" resultType="Invite">
+		<include refid="selectByGongSql" />
+		and agree = 1
+	</select>
+	<select id="selectAgreeByGongWithGS" parameterType="User"
+		resultMap="InviteMap">
+		<include refid="selectByGongWithGSSql" />
+		and agree = 1
+	</select>
+	<!-- 有应答 -->
+	<select id="selectReplyByGong" parameterType="User" resultType="Invite">
+		<include refid="selectByGongSql" />
+		and (agree is null or agree = 1)
+	</select>
+	<select id="selectReplyByGongWithGS" parameterType="User"
+		resultMap="InviteMap">
+		<include refid="selectByGongWithGSSql" />
+		and (agree is null or agree = 1)
+	</select>
+
+
+
+
+	<!-- by Shou User -->
+	<!-- 同意 -->
+	<sql id="selectByShouSql">
+		select id, gongId, shouId, agree, `leading`, `read` from
+		invite where shouId =
+		#{id} and
+		agree
+	</sql>
+	<sql id="selectByShouWithGSSql">
+		select
+		i.id i_id, i.gongId i_gongId, i.shouId i_shouId, i.`leading` i_leading, i.`read` i_read,
+		i.agree i_agree,
+		g.username g_username, g.password g_password, g.email
+		g_email, g.sex g_sex,
+		g.homeId g_homeId,
+		s.username s_username,
+		s.password s_password, s.email s_email, s.sex s_sex,
+		s.homeId s_homeId
+		from
+		invite as i join user as g join user as s
+		on i.gongId = g.id and
+		i.shouId = s.id
+		where
+		i.shouId = #{id} and agree
+	</sql>
+	<!-- 已同意 -->
+	<select id="selectAgreeByShou" parameterType="User" resultType="Invite">
+		<include refid="selectByShouSql" />
+		= 1
+	</select>
+	<select id="selectAgreeByShouWithGS" parameterType="User"
+		resultMap="InviteMap">
+		<include refid="selectByShouWithGSSql" />
+		= 1
+	</select>
+	<!-- 未回复 -->
+	<select id="selectNoReplyByShou" parameterType="User" resultType="Invite">
+		<include refid="selectByShouSql" />
+		= 0
+	</select>
+	<select id="selectNoReplyByShouWithGS" parameterType="User"
+		resultMap="InviteMap">
+		<include refid="selectByShouWithGSSql" />
+		= 0
+	</select>
+</mapper>

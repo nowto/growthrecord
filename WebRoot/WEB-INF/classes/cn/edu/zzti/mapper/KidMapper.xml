@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.zzti.mapper.KidMapper">
+	<resultMap type="cn.edu.zzti.dto.VaccineNotify" id="VaccineNotifyMap">
+		<association property="kid" javaType="Kid">
+			<id column="k_id" property="id"/>
+			<result column="k_name" property="name"/>
+			<result column="nickname" property="nickname"/>
+			<result column="sex" property="sex"/>
+			<result column="birthday" property="birthday"/>
+			<result column="youstart" property="youstart"/>
+			<result column="youend" property="youend"/>
+			<result column="xiaostart" property="xiaostart"/>
+			<result column="xiaoend" property="xiaoend"/>
+			<result column="chustart" property="chustart"/>
+			<result column="chuend" property="chuend"/>
+			<result column="gaostart" property="gaostart"/>
+			<result column="gaoend" property="gaoend"/>
+			<result column="dastart" property="dastart"/>
+			<result column="daend" property="daend"/>
+			<result column="homeId" property="homeId"/>
+			<result column="monAge" property="monthAge"/>
+		</association>
+		<association property="vaccinePlan" javaType="VaccinePlan">
+			<id column="v_id" property="id"/>
+			<result column="v_name" property="name"/>
+			<result column="note" property="note"/>
+			<result column="startDate" property="startDate"/>
+			<result column="endDate" property="endDate"/>
+			<result column="minAge" property="minAge"/>
+			<result column="maxAge" property="maxAge"/>
+			<result column="site" property="site"/>
+			
+		</association>
+	</resultMap>
+	<insert id="insert" parameterType="Kid" useGeneratedKeys="true"
+		keyProperty="id">
+		insert into kid (name, nickname, sex, birthday, youstart, youend, xiaostart, xiaoend, chustart, chuend, gaostart, gaoend, dastart, daend, homeId)
+		values (#{name}, #{nickname}, #{sex}, #{birthday}, #{youstart}, #{youend}, #{xiaostart}, #{xiaoend}, #{chustart}, #{chuend}, #{gaostart}, #{gaoend}, #{dastart}, #{daend}, #{homeId})
+	</insert>
+
+	<select id="selectVaccineNotify" parameterType="int" resultMap="VaccineNotifyMap">
+		select 
+			k.id k_id, k.name k_name, nickname, sex, birthday, youstart, youend, xiaostart, xiaoend, chustart, chuend, gaostart, gaoend, dastart, daend, homeId, period_diff(truncate((curdate()+0)/100, 0),truncate((birthday+0)/100, 0)) as monthAge, 
+			v.id v_id, v.name v_name, note, startDate, endDate, minAge, maxAge, site 
+		from 
+			kid k, vaccineplan v 
+		where 
+			period_diff(truncate((curdate()+0)/100, 0),truncate((birthday+0)/100, 0)) &gt;= minAge 
+			and period_diff(truncate((curdate()+0)/100, 0),truncate((birthday+0)/100, 0)) &lt;= maxAge 
+			and datediff(startDate, now()) &lt;= 4 
+			and datediff(endDate, now()) &gt; 0
+			and homeId = #{homeId}
+	</select>
+	<select id="selectVaccineNotifyNum" parameterType="int" resultType="int">
+		select 
+			count(*)
+		from 
+			kid k, vaccineplan v 
+		where 
+			period_diff(truncate((curdate()+0)/100, 0),truncate((birthday+0)/100, 0)) &gt;= minAge 
+			and period_diff(truncate((curdate()+0)/100, 0),truncate((birthday+0)/100, 0)) &lt;= maxAge 
+			and datediff(startDate, now()) &lt;= 4 
+			and datediff(endDate, now()) &gt; 0
+			and homeId = #{homeId}
+	</select>
+
+	<select id="select" parameterType="int" resultType="Kid">
+		select * from kid where id = #{id}
+	</select>
+
+	<select id="selectByHomeId" parameterType="int" resultType="Kid">
+		select * from kid where homeId
+		= #{homeId} order by birthday
+	</select>
+	<select id="selectTemplet" parameterType="int" resultType="Kid">
+		select * from kid where (name, sex, birthday) in (select distinct name, sex, birthday from kid) and homeId = #{newHomeId} limit 1
+	</select>
+
+
+	<select id="selectFollower" parameterType="Kid" resultType="Kid">
+		select * from kid where name = #{name} and sex = #{sex} and birthday = #{birthday} and id != #{id}
+	</select>
+	<delete id="delete" parameterType="int">
+		delete from kid where id =
+		#{id}
+	</delete>
+	<delete id="deleteByHomeId" parameterType="int">
+		delete from kid where
+		homeId = #{homeId}
+	</delete>
+
+	<update id="update" parameterType="Kid">
+		update kid
+		<set>
+			<if test="name != null and name != ''">
+				name = #{name},
+			</if>
+			<if test="nickname != null and nickname != ''">
+				nickname = #{nickname},
+			</if>
+
+			<if test="sex != null and sex != ''">
+				sex = #{sex},
+			</if>
+
+			<if test="birthday != null">
+				birthday = #{birthday},
+			</if>
+			
+			<if test="youstart != null">
+				youstart = #{youstart},
+			</if>
+			<if test="youend != null">
+				youend = #{youend},
+			</if>
+			
+			<if test="xiaostart != null">
+				xiaostart = #{xiaostart},
+			</if>
+			<if test="xiaoend != null">
+				xiaoend = #{xiaoend},
+			</if>
+			
+			<if test="chustart != null">
+				chustart = #{chustart},
+			</if>
+			<if test="chuend != null">
+				chuend = #{chuend},
+			</if>
+			
+			<if test="gaostart != null">
+				gaostart = #{gaostart},
+			</if>
+			<if test="gaoend != null">
+				gaoend = #{gaoend},
+			</if>
+			
+			<if test="dastart != null">
+				dastart = #{dastart},
+			</if>
+			<if test="daend != null">
+				daend = #{daend},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+</mapper>

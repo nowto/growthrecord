@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.zzti.mapper.StudyRecordMapper">
+	<resultMap type="StudyRecord" id="studyRecordMap">
+		<id column="id" property="id" />
+		<result column="competition" property="competition" />
+		<result column="grade" property="grade" />
+		<result column="recordDate" property="recordDate" />
+		<result column="kidId" property="kidId" />
+		<association property="kid" javaType="Kid">
+			<id column="kidId" property="id" />
+			<result column="name" property="name"/>
+			<result column="nickname" property="nickname"/>
+			<result column="sex" property="sex"/>
+			<result column="birthday" property="birthday"/>
+			<result column="youstart" property="youstart"/>
+			<result column="youend" property="youend"/>
+			<result column="xiaostart" property="xiaostart"/>
+			<result column="xiaoend" property="xiaoend"/>
+			<result column="chustart" property="chustart"/>
+			<result column="chuend" property="chuend"/>
+			<result column="gaostart" property="gaostart"/>
+			<result column="gaoend" property="gaoend"/>
+			<result column="dastart" property="dastart"/>
+			<result column="daend" property="daend"/>
+			<result column="homeId" property="homeId"/>
+		</association>
+	</resultMap>
+
+	<insert id="insert" parameterType="StudyRecord">
+		insert into studyrecord
+		(competition, grade, recordDate, kidId) values (#{competition},
+		#{grade}, #{recordDate}, #{kidId});
+	</insert>
+	<select id="selectBySearch" parameterType="cn.edu.zzti.dto.StudyRecordSearchBean"
+		resultMap="studyRecordMap">
+		select studyrecord.id, competition, grade, recordDate, kidId, name,
+		nickname, sex, birthday, youstart, youend, xiaostart, xiaoend,
+		chustart, chuend, gaostart, gaoend, dastart, daend, homeId from
+		studyrecord join kid on (studyrecord.kidId = kid.id)
+		<where>
+			<if test="competition != null">
+				and competition like concat('%',#{competition},'%')
+			</if>
+			<if test="grade != null">
+				and grade like concat('%',#{grade},'%')
+			</if>
+			<if test="startdate != null">
+				and recordDate &gt;= #{startdate}
+			</if>
+			<if test="enddate != null">
+				and recordDate &lt;= #{enddate}
+			</if>
+			<if test="kidId != null">
+				and kidId = #{kidId}
+			</if>
+			<if test="homeId != null">
+				and homeId = #{homeId}
+			</if>
+			<if test="eduStartDate">
+				and recordDate &gt;= #{eduStartDate}
+			</if>
+			<if test="eduEndDate">
+				and recordDate &lt;= #{eduEndDate}
+			</if>
+		</where>
+		order by recordDate desc limit #{limitOne}, #{limitTwo}
+	</select>
+	<select id="selectBySearchCount" parameterType="cn.edu.zzti.dto.StudyRecordSearchBean"
+		resultType="java.lang.Integer">
+		select count(*) from
+		studyrecord join kid on (studyrecord.kidId = kid.id)
+		<where>
+			<if test="competition != null">
+				and competition like concat('%',#{competition},'%')
+			</if>
+			<if test="grade != null">
+				and grade like concat('%',#{grade},'%')
+			</if>
+			<if test="startdate != null">
+				and recordDate &gt;= #{startdate}
+			</if>
+			<if test="enddate != null">
+				and recordDate &lt;= #{enddate}
+			</if>
+			<if test="kidId != null">
+				and kidId = #{kidId}
+			</if>
+			<if test="homeId != null">
+				and homeId = #{homeId}
+			</if>
+			<if test="eduStartDate">
+				and recordDate &gt;= #{eduStartDate}
+			</if>
+			<if test="eduEndDate">
+				and recordDate &lt;= #{eduEndDate}
+			</if>
+		</where>
+	</select>
+	<delete id="deleteById" parameterType="Integer">
+		delete from studyrecord where id = #{id}
+	</delete>
+	<update id="updateKidId" parameterType="cn.edu.zzti.dto.Mover">
+		update studyrecord set kidId = #{newInt} where kidId = #{oldInt}
+	</update>
+</mapper>

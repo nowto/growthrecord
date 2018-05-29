@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.zzti.mapper.FigureRecordMapper">
+	<resultMap type="FigureRecord" id="figureRecordMap">
+		<id column="id" property="id" />
+		<result column="type" property="type" />
+		<result column="note" property="note" />
+		<result column="recordDate" property="recordDate" />
+		<result column="kidId" property="kidId" />
+		<result column="realFileName" property="realFileName" />
+		<result column="sourceFileName" property="sourceFileName" />
+		<association property="kid" javaType="Kid">
+			<id column="kidId" property="id" />
+			<result column="name" property="name" />
+			<result column="nickname" property="nickname" />
+			<result column="sex" property="sex" />
+			<result column="birthday" property="birthday" />
+			<result column="youstart" property="youstart" />
+			<result column="youend" property="youend" />
+			<result column="xiaostart" property="xiaostart" />
+			<result column="xiaoend" property="xiaoend" />
+			<result column="chustart" property="chustart" />
+			<result column="chuend" property="chuend" />
+			<result column="gaostart" property="gaostart" />
+			<result column="gaoend" property="gaoend" />
+			<result column="dastart" property="dastart" />
+			<result column="daend" property="daend" />
+			<result column="homeId" property="homeId" />
+		</association>
+	</resultMap>
+	<insert id="insert" parameterType="FigureRecord">
+		insert into figurerecord
+		(type, note, recordDate, kidId, realFileName, sourceFileName) values
+		(#{type}, #{note}, #{recordDate}, #{kidId}, #{realFileName},
+		#{sourceFileName})
+	</insert>
+	<select id="select" parameterType="int" resultType="FigureRecord">
+		select * from
+		figurerecord where id = #{id};
+	</select>
+	<select id="selectWithKid" parameterType="int" resultMap="figureRecordMap">
+		select
+		figurerecord.id, type, note, recordDate, kidId, realFileName,
+		sourceFileName, name,
+		nickname, sex, birthday, youstart, youend,
+		xiaostart, xiaoend,
+		chustart, chuend, gaostart, gaoend, dastart, daend,
+		homeId from
+		figurerecord join kid on (figurerecord.kidId = kid.id)
+		where figurerecord.id = #{id}
+	</select>
+	<select id="selectBySearch" parameterType="cn.edu.zzti.dto.FigureRecordSearchBean"
+		resultMap="figureRecordMap">
+		select figurerecord.id, type, note, recordDate, kidId, realFileName,
+		sourceFileName, name,
+		nickname, sex, birthday, youstart, youend,
+		xiaostart, xiaoend,
+		chustart, chuend, gaostart, gaoend, dastart, daend,
+		homeId from
+		figurerecord join kid on (figurerecord.kidId = kid.id)
+		<where>
+			<if test="homeId != null">
+				and homeId = #{homeId}
+			</if>
+			<if test="startdate != null">
+				and recordDate &gt;= #{startdate}
+			</if>
+			<if test="enddate != null">
+				and recordDate &lt;= #{enddate}
+			</if>
+			<if test="note != null">
+				and note like concat('%', #{note}, '%')
+			</if>
+			and type = #{type}
+			<if test="kidId != null">
+				and kidId = #{kidId}
+			</if>
+		</where>
+		order by recordDate desc limit #{limitOne}, #{limitTwo}
+	</select>
+	<select id="selectBySearchCount" parameterType="cn.edu.zzti.dto.FigureRecordSearchBean"
+		resultType="java.lang.Integer">
+		select count(*) from
+		figurerecord join kid on (figurerecord.kidId =
+		kid.id)
+		<where>
+			<if test="homeId != null">
+				and homeId = #{homeId}
+			</if>
+			<if test="startdate != null">
+				and recordDate &gt;= #{startdate}
+			</if>
+			<if test="enddate != null">
+				and recordDate &lt;= #{enddate}
+			</if>
+			<if test="note != null">
+				and note like concat('%', #{note}, '%')
+			</if>
+			and type = #{type}
+			<if test="kidId != null">
+				and kidId = #{kidId}
+			</if>
+		</where>
+	</select>
+	<update id="updateKidId" parameterType="cn.edu.zzti.dto.Mover">
+		update figurerecord set
+		kidId = #{newInt} where kidId = #{oldInt}
+	</update>
+	<delete id="deleteById" parameterType="int">
+		delete from figurerecord where id = #{id}
+	</delete>
+</mapper>
